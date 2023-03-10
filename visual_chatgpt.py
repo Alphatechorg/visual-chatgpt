@@ -78,6 +78,7 @@ Since Visual ChatGPT is a text language model, Visual ChatGPT must use tools to 
 The thoughts and observations are only visible for Visual ChatGPT, Visual ChatGPT should remember to repeat important information in the final response for Human. 
 Thought: Do I need to use a tool? {agent_scratchpad}"""
 
+# This function cuts the dialogue history to keep only the last n words, where n is specified by the user. It removes the earliest paragraphs until the number of tokens in the remaining paragraphs is less than n.
 def cut_dialogue_history(history_memory, keep_last_n_words=500):
     tokens = history_memory.split()
     n_tokens = len(tokens)
@@ -92,6 +93,7 @@ def cut_dialogue_history(history_memory, keep_last_n_words=500):
             paragraphs = paragraphs[1:]
         return '\n' + '\n'.join(paragraphs)
 
+# This function takes an image name and an optional function name and returns a new unique image name based on the original name and the function name.
 def get_new_image_name(org_img_name, func_name="update"):
     head_tail = os.path.split(org_img_name)
     head = head_tail[0]
@@ -109,6 +111,7 @@ def get_new_image_name(org_img_name, func_name="update"):
         new_file_name = '{}_{}_{}_{}.png'.format(this_new_uuid, func_name, recent_prev_file_name, most_org_file_name)
     return os.path.join(head, new_file_name)
 
+# This function create_model loads a model configuration from a given file path, updates the device parameter, instantiates the model using the configuration, and returns the instantiated model.
 def create_model(config_path, device):
     config = OmegaConf.load(config_path)
     OmegaConf.update(config, "model.params.cond_stage_config.params.device", device)
@@ -116,6 +119,7 @@ def create_model(config_path, device):
     print(f'Loaded model config from [{config_path}]')
     return model
 
+#This class contains a method named "inference" that runs a pre-trained image segmentation model on an image and returns the resulting binary mask.
 class MaskFormer:
     def __init__(self, device):
         self.device = device
@@ -144,6 +148,7 @@ class MaskFormer:
         image_mask = Image.fromarray(visual_mask)
         return image_mask.resize(image.size)
 
+#This code defines a class MaskFormer with methods for performing image segmentation inference using a CLIPSeg model.
 class ImageEditing:
     def __init__(self, device):
         print("Initializing StableDiffusionInpaint to %s" % device)
@@ -166,6 +171,7 @@ class ImageEditing:
         updated_image.save(updated_image_path)
         return updated_image_path
 
+#This code defines a Pix2Pix class that initializes the model and performs image-to-image translation using text instructions to guide the transformation.
 class Pix2Pix:
     def __init__(self, device):
         print("Initializing Pix2Pix to %s" % device)
@@ -183,6 +189,7 @@ class Pix2Pix:
         image.save(updated_image_path)
         return updated_image_path
 
+#This code initializes the Stable Diffusion Pipeline and the MagicPrompt-Stable-Diffusion model for text refinement, and generates an image from refined text input.
 class T2I:
     def __init__(self, device):
         print("Initializing T2I to %s" % device)
@@ -202,6 +209,7 @@ class T2I:
         print(f"Processed T2I.run, text: {text}, image_filename: {image_filename}")
         return image_filename
 
+#This code defines three classes for performing image-related tasks including image captioning, edge detection, and image generation using deep diffusion.
 class ImageCaptioning:
     def __init__(self, device):
         print("Initializing ImageCaptioning to %s" % device)
@@ -215,6 +223,7 @@ class ImageCaptioning:
         captions = self.processor.decode(out[0], skip_special_tokens=True)
         return captions
 
+#This code defines a class that detects edges in an image using the Canny edge detection algorithm.
 class image2canny:
     def __init__(self):
         print("Direct detect canny.")
@@ -233,6 +242,7 @@ class image2canny:
         image.save(updated_image_path)
         return updated_image_path
 
+#This code defines a class that uses a pre-trained model to generate an image based on an input image and text prompt.
 class canny2image:
     def __init__(self, device):
         print("Initialize the canny2image model.")
@@ -282,6 +292,7 @@ class canny2image:
         real_image.save(updated_image_path)
         return updated_image_path
 
+#This code defines a class image2line that detects straight lines in an image using a MLSDdetector, and saves the resulting image with the detected lines.
 class image2line:
     def __init__(self):
         print("Direct detect straight line...")
@@ -302,7 +313,7 @@ class image2line:
         image.save(updated_image_path)
         return updated_image_path
 
-
+#This code defines a class for generating an image from a given line using a trained model.
 class line2image:
     def __init__(self, device):
         print("Initialize the line2image model...")
@@ -936,6 +947,7 @@ class ConversationBot:
         print("Outputs:", state)
         return state, state, txt + ' ' + image_filename + ' '
 
+#This code creates a GUI for the conversational bot using the gradio library and launches it on a specified server and port number.
 if __name__ == '__main__':
     bot = ConversationBot()
     with gr.Blocks(css="#chatbot .overflow-y-auto{height:500px}") as demo:
